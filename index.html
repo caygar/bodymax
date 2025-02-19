@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BodyMax</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    #result {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome to BodyMax</h1>
+    <p>Your personal body composition analyzer</p>
+  </header>
+  
+  <div class="container">
+    <input type="file" id="file-input" accept="image/*" />
+    <button id="upload-button">Upload</button>
+    <div id="result"></div>
+  </div>
+  
+  <script>
+    // Basic file upload to the FastAPI endpoint at http://localhost:8000/analyze-image
+    document.getElementById('upload-button').addEventListener('click', async function() {
+      const input = document.getElementById('file-input');
+      if (!input.files || !input.files[0]) {
+        alert("Please select an image file.");
+        return;
+      }
+      
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+        const response = await fetch('http://localhost:8000/analyze-image', {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Error uploading file.');
+        }
+        const result = await response.json();
+        document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+      } catch (error) {
+        document.getElementById('result').textContent = 'Error: ' + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
